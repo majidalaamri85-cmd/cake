@@ -189,7 +189,7 @@ LOGIN_URL = 'login'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'bookings@example.com'
 
-CAKE_PRICE_PER_KG = 5
+CAKE_PRICE_PER_KG = 4
 PAYMENT_CURRENCY = 'ريال'
 PAYMENT_PROVIDER = 'thawani'
 BAKERY_WHATSAPP_PHONE = '96899599773'
