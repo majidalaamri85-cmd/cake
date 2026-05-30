@@ -1,0 +1,24 @@
+databases:
+  - name: cake-db
+    plan: free
+    databaseName: cake
+    user: cake
+
+services:
+  - type: web
+    name: cake-booking
+    runtime: python
+    plan: free
+    buildCommand: 'bash build.sh'
+    startCommand: 'python -m gunicorn cake_booking.wsgi:application --bind 0.0.0.0:$PORT'
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cake-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: 'False'
+      - key: WEB_CONCURRENCY
+        value: '4'

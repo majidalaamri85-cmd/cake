@@ -34,3 +34,25 @@ DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost
 - ملف قاعدة البيانات `db.sqlite3` مستبعد من Git.
 - مجلد `media/` مستبعد لأنه مخصص للملفات المرفوعة محليًا.
 - ملفات التشغيل والسجلات وملفات `__pycache__` مستبعدة من Git.
+
+## النشر على Render
+
+المشروع يحتوي على ملف `render.yaml` لتجهيز Web Service وقاعدة PostgreSQL تلقائيًا.
+
+1. افتح Render واختر New Blueprint.
+2. اربط مستودع GitHub الخاص بالمشروع.
+3. اختر ملف `render.yaml` واتبع خطوات الإنشاء.
+
+Render سيستخدم:
+
+```text
+Build Command: bash build.sh
+Start Command: python -m gunicorn cake_booking.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+ملاحظات مهمة:
+
+- `DJANGO_DEBUG=False` مفعلة في Render.
+- `SECRET_KEY` يتم توليده تلقائيًا من Render.
+- `DATABASE_URL` مربوط بقاعدة PostgreSQL من Render.
+- خطة Render المجانية لا تحفظ الملفات المرفوعة في `media/` بعد إعادة التشغيل أو إعادة النشر.
