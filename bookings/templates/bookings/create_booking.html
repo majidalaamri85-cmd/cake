@@ -1,0 +1,55 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}حجز جديد{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <section class="panel">
+        <div class="section-head">
+            <h1>حجز كعكة جديدة</h1>
+            <span class="badge">{{ price_per_kg }} {{ currency }} / كجم</span>
+        </div>
+
+        <form method="post" class="form-grid" id="booking-form" data-price="{{ price_per_kg }}">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="field">
+                    {{ field.errors }}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.name == 'weight_kg' %}
+                        <p class="help">اختر الوزن المناسب من 1 إلى 6 كجم.</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <div class="summary">
+            <div class="row"><span>السعر التقريبي</span><strong id="live-total">0 {{ currency }}</strong></div>
+                <div class="row"><span>الحالة بعد الإرسال</span><strong>بانتظار الدفع</strong></div>
+            </div>
+
+            <button class="btn btn-primary btn-full" type="submit">متابعة إلى الدفع</button>
+        </form>
+    </section>
+</div>
+
+<script>
+    const form = document.getElementById('booking-form');
+    const weight = document.getElementById('id_weight_kg');
+    const quantity = document.getElementById('id_quantity');
+    const total = document.getElementById('live-total');
+    const price = Number(form.dataset.price || 0);
+
+    function updateTotal() {
+        const kg = Number(weight.value || 0);
+        const qty = Number(quantity.value || 1);
+    total.textContent = `${(kg * qty * price).toFixed(2)} {{ currency }}`;
+    }
+
+    weight.addEventListener('change', updateTotal);
+    quantity.addEventListener('input', updateTotal);
+    updateTotal();
+</script>
+{% endblock %}

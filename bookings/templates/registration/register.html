@@ -1,0 +1,26 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}تسجيل حساب{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <section class="panel">
+        <h1>تسجيل حساب جديد</h1>
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                <div class="field">
+                    {{ field.errors }}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <p class="help">{{ field.help_text }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button class="btn btn-primary btn-full" type="submit">إنشاء الحساب</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

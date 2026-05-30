@@ -1,0 +1,38 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}حجوزاتي{% endblock %}
+
+{% block content %}
+<section class="section-head">
+    <h1>حجوزاتي</h1>
+    <a class="btn btn-primary" href="{% url 'create_booking' %}">حجز جديد</a>
+</section>
+
+{% if bookings %}
+    <div class="grid">
+        {% for booking in bookings %}
+            <article class="card">
+                <div class="card-body">
+                    <h2>{{ booking.cake.name }}</h2>
+                    <p class="muted">{{ booking.delivery_date }} - {{ booking.weight_kg }} كجم</p>
+                    <p><span class="badge">{{ booking.get_status_display }}</span></p>
+                    <p class="price">{{ booking.total_price }} {{ currency }}</p>
+                    <div class="actions">
+                        <a class="btn btn-outline" href="{% url 'booking_detail' booking.id %}">التفاصيل</a>
+                        {% if booking.payment_status != 'paid' %}
+                            <a class="btn btn-secondary" href="{% url 'payment' booking.id %}">الدفع</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty">
+        لا توجد حجوزات بعد.
+        <div class="actions" style="justify-content:center;">
+            <a class="btn btn-primary" href="{% url 'create_booking' %}">ابدأ أول حجز</a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}الدفع{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <section class="panel">
+        <h1>إتمام الدفع</h1>
+
+        <div class="summary">
+            <div class="row"><span>الكعكة</span><strong>{{ booking.cake.name }}</strong></div>
+            <div class="row"><span>الوزن</span><strong>{{ booking.weight_kg }} كجم</strong></div>
+            <div class="row"><span>الكمية</span><strong>{{ booking.quantity }}</strong></div>
+            <div class="row"><span>المبلغ</span><strong class="price">{{ booking.total_price }} {{ currency }}</strong></div>
+        </div>
+
+        <p class="muted">
+            خيارات الدفع مهيأة لسلطنة عمان: بوابة ثواني/OmanNet، بوابة بنك مسقط للتجار، أو تحويل بنكي محلي.
+        </p>
+
+        <form method="post" class="form-grid" style="margin-top: 18px;" id="payment-form">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="field">
+                {{ form.payment_method.errors }}
+                <label>{{ form.payment_method.label }}</label>
+                {{ form.payment_method }}
+            </div>
+
+            <div id="gateway-details" class="summary" hidden>
+                <div class="row">
+                    <span>آلية الدفع</span>
+                    <strong>تحويل آمن إلى صفحة البوابة</strong>
+                </div>
+                <div class="row">
+                    <span>البطاقات</span>
+                    <strong>OmanNet / Visa / Mastercard حسب عقد التاجر</strong>
+                </div>
+            </div>
+
+            <div id="transfer-details" class="summary" hidden>
+                <div class="row"><span>البنك</span><strong>{{ bank_transfer_details.bank_name }}</strong></div>
+                <div class="row"><span>اسم الحساب</span><strong>{{ bank_transfer_details.account_name }}</strong></div>
+                <div class="row"><span>رقم الحساب</span><strong>{{ bank_transfer_details.account_number }}</strong></div>
+            </div>
+
+            <button class="btn btn-secondary btn-full" type="submit">تأكيد الدفع</button>
+        </form>
+    </section>
+</div>
+
+<script>
+    const gatewayDetails = document.getElementById('gateway-details');
+    const radios = document.querySelectorAll('input[name="payment_method"]');
+
+    function toggleCardDetails() {
+        const selected = document.querySelector('input[name="payment_method"]:checked');
+        const transferDetails = document.getElementById('transfer-details');
+        const isGateway = selected && ['thawani_omannet', 'bank_muscat_gateway'].includes(selected.value);
+        gatewayDetails.hidden = !isGateway;
+        transferDetails.hidden = !selected || selected.value !== 'oman_bank_transfer';
+    }
+
+    radios.forEach((radio) => radio.addEventListener('change', toggleCardDetails));
+    toggleCardDetails();
+</script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'bookings/base.html' %}
+{% load static %}
+
+{% block title %}أسواق ومخبز الرغيف الطازج{% endblock %}
+
+{% block content %}
+<section class="section products-section" id="products">
+    {% if cakes %}
+        <div class="grid">
+            {% for cake in cakes %}
+                <article class="card cake-card">
+                    <div class="cake-image">
+                        {% if cake.image %}
+                            <img src="{{ cake.image.url }}" alt="صورة منتج">
+                        {% else %}
+                            {{ cake.name|first }}
+                        {% endif %}
+                        <span class="image-price">{{ price_per_kg }} {{ currency }} / كيلو</span>
+                    </div>
+                    <div class="card-body">
+                        <form class="quick-book" method="get" action="{% url 'whatsapp_order' %}">
+                            <input type="hidden" name="cake" value="{{ cake.id }}">
+                            <label for="weight-{{ cake.id }}">اختيار الوزن</label>
+                            <select id="weight-{{ cake.id }}" name="weight_kg">
+                                <option value="1">1 كجم</option>
+                                <option value="2">2 كجم</option>
+                                <option value="3">3 كجم</option>
+                                <option value="4">4 كجم</option>
+                                <option value="5">5 كجم</option>
+                                <option value="6">6 كجم</option>
+                            </select>
+                            <div class="booking-actions">
+                                <button class="btn btn-whatsapp" type="submit" aria-label="الحجز عبر واتساب من الهاتف">
+                                    <span class="whatsapp-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" focusable="false">
+                                            <path d="M12 3.6a8.2 8.2 0 0 0-7 12.5l-.9 3.3 3.4-.9A8.2 8.2 0 1 0 12 3.6Zm0 1.8a6.4 6.4 0 1 1-3.3 11.9l-.4-.2-1.8.5.5-1.7-.3-.5A6.4 6.4 0 0 1 12 5.4Zm-2.2 3.4c-.2 0-.4.1-.6.3-.2.3-.7.8-.7 1.8s.7 2 1 2.4c.1.1 1.5 2.3 3.8 3.1 1.9.8 2.3.6 2.7.6.4-.1 1.3-.6 1.5-1.1.2-.5.2-1 .1-1.1s-.2-.2-.5-.3l-1.5-.7c-.2-.1-.4-.1-.6.2l-.6.8c-.1.2-.3.2-.5.1-.3-.1-1-.4-1.8-1.1-.7-.6-1.1-1.3-1.2-1.6-.2-.2 0-.4.1-.5l.4-.4c.1-.2.2-.3.3-.5.1-.2.1-.3 0-.5l-.7-1.5c-.2-.4-.4-.4-.6-.4h-.6Z" />
+                                        </svg>
+                                    </span>
+                                    احجز بالواتساب
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty">
+            لا توجد كعكات مضافة بعد. أضف أنواع الكعك من لوحة الإدارة.
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

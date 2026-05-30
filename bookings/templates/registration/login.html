@@ -1,0 +1,27 @@
+{% extends 'bookings/base.html' %}
+
+{% block title %}تسجيل الدخول{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <section class="panel">
+        <h1>تسجيل الدخول</h1>
+        <form method="post" class="form-grid">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="field">
+                {{ form.username.errors }}
+                <label for="{{ form.username.id_for_label }}">اسم المستخدم</label>
+                {{ form.username }}
+            </div>
+            <div class="field">
+                {{ form.password.errors }}
+                <label for="{{ form.password.id_for_label }}">كلمة المرور</label>
+                {{ form.password }}
+            </div>
+            <button class="btn btn-primary btn-full" type="submit">دخول</button>
+        </form>
+        <p class="muted">ليس لديك حساب؟ <a class="price" href="{% url 'register' %}">سجّل الآن</a></p>
+    </section>
+</div>
+{% endblock %}

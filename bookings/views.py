@@ -1,0 +1,174 @@
+import uuid
+from urllib.parse import quote
+
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+from .forms import BookingForm, PaymentForm, RegisterForm
+from .models import Booking, Cake, Payment
+
+
+def home(request):
+    cakes = Cake.objects.filter(is_available=True)
+    return render(request, 'bookings/home.html', {
+        'cakes': cakes,
+        'price_per_kg': settings.CAKE_PRICE_PER_KG,
+        'currency': settings.PAYMENT_CURRENCY,
+    })
+
+
+def register(request):
+    if request.method == 'POST':
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'تم إنشاء الحساب بنجاح. أهلاً بك!')
+            return redirect('home')
+    else:
+        form = RegisterForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+
+def whatsapp_order(request):
+    cake = get_object_or_404(Cake, id=request.GET.get('cake'), is_available=True)
+    weight_kg = request.GET.get('weight_kg')
+    if weight_kg not in {'1', '2', '3', '4', '5', '6'}:
+        weight_kg = '1'
+
+    total_price = int(weight_kg) * settings.CAKE_PRICE_PER_KG
+    product_url = request.build_absolute_uri(cake.image.url) if cake.image else request.build_absolute_uri('/')
+    message = (
+        f'السلام عليكم، أريد طلب منتج من المخبز.\n'
+        f'المنتج: {cake.name}\n'
+        f'الوزن: {weight_kg} كجم\n'
+        f'السعر التقريبي: {total_price} {settings.PAYMENT_CURRENCY}\n'
+        f'رابط المنتج: {product_url}\n'
+        'فضلاً أرسلوا لي تفاصيل التأكيد.'
+    )
+    phone = getattr(settings, 'BAKERY_WHATSAPP_PHONE', '').strip().replace('+', '')
+    return redirect(f'https://wa.me/{phone}?text={quote(message)}')
+
+
+@login_required
+def create_booking(request):
+    initial = {}
+    cake_id = request.GET.get('cake')
+    weight_kg = request.GET.get('weight_kg')
+    if cake_id:
+        initial['cake'] = cake_id
+    if weight_kg in {'1', '2', '3', '4', '5', '6'}:
+        initial['weight_kg'] = weight_kg
+
+    if request.method == 'POST':
+        form = BookingForm(request.POST)
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.user = request.user
+            booking.save()
+            send_booking_email(booking)
+            messages.success(request, 'تم إنشاء الحجز. أكمل الدفع لتأكيد الطلب.')
+            return redirect('payment', booking_id=booking.id)
+    else:
+        form = BookingForm(initial=initial)
+
+    return render(request, 'bookings/create_booking.html', {
+        'form': form,
+        'price_per_kg': settings.CAKE_PRICE_PER_KG,
+        'currency': settings.PAYMENT_CURRENCY,
+    })
+
+
+@login_required
+def payment_view(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    if booking.payment_status == 'paid':
+        messages.info(request, 'هذا الحجز مدفوع مسبقاً.')
+        return redirect('booking_detail', booking_id=booking.id)
+
+    if request.method == 'POST':
+        form = PaymentForm(request.POST)
+        if form.is_valid():
+            transaction_prefix = {
+                'thawani_omannet': 'THW',
+                'bank_muscat_gateway': 'BM',
+                'oman_bank_transfer': 'OM-BANK',
+            }.get(form.cleaned_data['payment_method'], 'PAY')
+            Payment.objects.create(
+                booking=booking,
+                amount=booking.total_price,
+                payment_method=form.cleaned_data['payment_method'],
+                transaction_id=f'{transaction_prefix}-{uuid.uuid4()}',
+                paid_at=timezone.now(),
+            )
+            booking.payment_status = 'paid'
+            booking.status = 'confirmed'
+            booking.save(update_fields=['payment_status', 'status', 'total_price', 'updated_at'])
+            send_payment_email(booking)
+            messages.success(request, 'تم الدفع بنجاح وتم تأكيد الحجز.')
+            return redirect('booking_detail', booking_id=booking.id)
+    else:
+        form = PaymentForm()
+
+    return render(request, 'bookings/payment.html', {
+        'booking': booking,
+        'form': form,
+        'currency': settings.PAYMENT_CURRENCY,
+        'bank_transfer_details': settings.OMAN_BANK_TRANSFER_DETAILS,
+    })
+
+
+@login_required
+def booking_detail(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id, user=request.user)
+    return render(request, 'bookings/booking_detail.html', {
+        'booking': booking,
+        'currency': settings.PAYMENT_CURRENCY,
+    })
+
+
+@login_required
+def my_bookings(request):
+    bookings = Booking.objects.filter(user=request.user).select_related('cake')
+    return render(request, 'bookings/my_bookings.html', {
+        'bookings': bookings,
+        'currency': settings.PAYMENT_CURRENCY,
+    })
+
+
+def send_booking_email(booking):
+    if not booking.user.email:
+        return
+    send_mail(
+        f'تم استلام حجز الكعكة رقم {booking.id}',
+        (
+            f'مرحباً {booking.user.username}\n\n'
+            f'تم استلام طلب {booking.cake.name} بوزن {booking.weight_kg} كجم.\n'
+            f'المبلغ الإجمالي: {booking.total_price} {settings.PAYMENT_CURRENCY}.\n'
+            'يرجى إكمال الدفع لتأكيد الحجز.'
+        ),
+        settings.DEFAULT_FROM_EMAIL,
+        [booking.user.email],
+        fail_silently=True,
+    )
+
+
+def send_payment_email(booking):
+    if not booking.user.email:
+        return
+    send_mail(
+        f'تم تأكيد دفع الحجز رقم {booking.id}',
+        (
+            f'مرحباً {booking.user.username}\n\n'
+            f'تم تأكيد حجز {booking.cake.name} للتاريخ {booking.delivery_date}.\n'
+            f'المبلغ المدفوع: {booking.total_price} {settings.PAYMENT_CURRENCY}.'
+        ),
+        settings.DEFAULT_FROM_EMAIL,
+        [booking.user.email],
+        fail_silently=True,
+    )
