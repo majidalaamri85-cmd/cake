@@ -10,7 +10,10 @@
             {% for cake in cakes %}
                 <article class="card cake-card">
                     <div class="cake-image">
-                        {% if cake.image %}
+                        {% if cake.catalog_image %}
+                            {% static cake.catalog_image as catalog_image_url %}
+                            <img src="{{ catalog_image_url }}" alt="صورة منتج">
+                        {% elif cake.image %}
                             <img src="{{ cake.image.url }}" alt="صورة منتج">
                         {% else %}
                             {{ cake.name|first }}

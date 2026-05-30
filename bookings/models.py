@@ -20,6 +20,7 @@ class Cake(models.Model):
     flavor = models.CharField(max_length=50, choices=FLAVOR_CHOICES, verbose_name='النكهة')
     description = models.TextField(blank=True, verbose_name='الوصف')
     image = models.ImageField(upload_to='cakes/', blank=True, verbose_name='الصورة')
+    catalog_image = models.CharField(max_length=255, blank=True, editable=False)
     is_available = models.BooleanField(default=True, verbose_name='متاحة')
 
     class Meta:
