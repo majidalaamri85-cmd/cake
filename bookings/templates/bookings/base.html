@@ -580,7 +580,18 @@
                 gap: 16px;
             }
             .cake-card { grid-template-rows: 238px 1fr; }
-            .cake-image { height: 238px; }
+            .cake-image {
+                height: 238px;
+                padding: 6px;
+                background: #f8f3eb;
+            }
+            .cake-image img {
+                object-fit: contain;
+                object-position: center;
+            }
+            .cake-card:hover .cake-image img {
+                transform: none;
+            }
             .image-price {
                 right: 10px;
                 bottom: 10px;
