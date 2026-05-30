@@ -7,6 +7,7 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
+from django.templatetags.static import static
 from django.utils import timezone
 
 from .forms import BookingForm, PaymentForm, RegisterForm
@@ -42,13 +43,18 @@ def whatsapp_order(request):
         weight_kg = '1'
 
     total_price = int(weight_kg) * settings.CAKE_PRICE_PER_KG
-    product_url = request.build_absolute_uri(cake.image.url) if cake.image else request.build_absolute_uri('/')
+    if cake.catalog_image:
+        product_url = request.build_absolute_uri(static(cake.catalog_image))
+    elif cake.image:
+        product_url = request.build_absolute_uri(cake.image.url)
+    else:
+        product_url = request.build_absolute_uri('/')
     message = (
         f'السلام عليكم، أريد طلب منتج من المخبز.\n'
         f'المنتج: {cake.name}\n'
         f'الوزن: {weight_kg} كجم\n'
         f'السعر التقريبي: {total_price} {settings.PAYMENT_CURRENCY}\n'
-        f'رابط المنتج: {product_url}\n'
+        f'صورة الكعكة: {product_url}\n'
         'فضلاً أرسلوا لي تفاصيل التأكيد.'
     )
     phone = getattr(settings, 'BAKERY_WHATSAPP_PHONE', '').strip().replace('+', '')
