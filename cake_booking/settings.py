@@ -192,7 +192,7 @@ DEFAULT_FROM_EMAIL = 'bookings@example.com'
 CAKE_PRICE_PER_KG = 4
 PAYMENT_CURRENCY = 'ريال'
 PAYMENT_PROVIDER = 'thawani'
-BAKERY_WHATSAPP_PHONE = '96899599773'
+BAKERY_WHATSAPP_PHONE = '96895066175'
 OMAN_BANK_TRANSFER_DETAILS = {
     'bank_name': 'Bank Muscat / بنك مسقط',
     'account_name': 'Cake Booking',
