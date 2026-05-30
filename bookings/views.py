@@ -51,7 +51,7 @@ def whatsapp_order(request):
         product_url = request.build_absolute_uri('/')
     message = (
         f'السلام عليكم، أريد طلب منتج من المخبز.\n'
-        f'المنتج: {cake.name}\n'
+        f'رقم الكعكة: {cake.id}\n'
         f'الوزن: {weight_kg} كجم\n'
         f'السعر التقريبي: {total_price} {settings.PAYMENT_CURRENCY}\n'
         f'صورة الكعكة: {product_url}\n'

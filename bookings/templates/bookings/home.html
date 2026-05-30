@@ -18,6 +18,7 @@
                         {% else %}
                             {{ cake.name|first }}
                         {% endif %}
+                        <span class="cake-number">رقم الكعكة: {{ cake.id }}</span>
                         <span class="image-price">{{ price_per_kg }} {{ currency }} / كيلو</span>
                     </div>
                     <div class="card-body">
