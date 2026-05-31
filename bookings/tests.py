@@ -9,6 +9,20 @@ from .forms import BookingForm
 from .models import Cake
 
 
+class HomeTests(TestCase):
+    def test_cakes_are_ordered_by_number(self):
+        Cake.objects.update(is_available=False)
+        first_cake = Cake.objects.create(name='Z cake', flavor='vanilla')
+        second_cake = Cake.objects.create(name='A cake', flavor='vanilla')
+
+        response = self.client.get(reverse('home'))
+
+        self.assertEqual(
+            list(response.context['cakes'].values_list('id', flat=True)),
+            [first_cake.id, second_cake.id],
+        )
+
+
 class BookingFormTests(TestCase):
     def setUp(self):
         self.cake = Cake.objects.create(name='Test cake', flavor='vanilla')

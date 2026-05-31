@@ -244,7 +244,7 @@
         .cake-card {
             overflow: hidden;
             display: grid;
-            grid-template-rows: 270px 1fr;
+            grid-template-rows: auto 1fr;
             min-height: 100%;
             border-color: rgba(22, 130, 58, .16);
             position: relative;
@@ -269,7 +269,7 @@
         .cake-image {
             position: relative;
             width: 100%;
-            height: 270px;
+            min-height: 270px;
             padding: 6px;
             background: #f8f3eb;
             display: grid;
@@ -289,7 +289,7 @@
         }
         .cake-image img {
             width: 100%;
-            height: 100%;
+            height: auto;
             object-fit: contain;
             object-position: center;
             display: block;
@@ -626,9 +626,9 @@
                 grid-template-columns: 1fr;
                 gap: 16px;
             }
-            .cake-card { grid-template-rows: 238px 1fr; }
+            .cake-card { grid-template-rows: auto 1fr; }
             .cake-image {
-                height: 238px;
+                min-height: 0;
             }
             .image-price {
                 right: 10px;

@@ -16,7 +16,7 @@ from .models import Booking, Cake, Payment
 
 
 def home(request):
-    cakes = Cake.objects.filter(is_available=True)
+    cakes = Cake.objects.filter(is_available=True).order_by('id')
     return render(request, 'bookings/home.html', {
         'cakes': cakes,
         'price_per_kg': settings.CAKE_PRICE_PER_KG,
