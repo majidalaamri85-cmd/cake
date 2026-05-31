@@ -38,12 +38,14 @@ class BookingFormTests(TestCase):
 
 
 class WhatsappOrderTests(TestCase):
+    def setUp(self):
+        self.cake = Cake.objects.create(name='Test cake', flavor='chocolate')
+
     def test_delivery_date_and_time_are_included_in_whatsapp_message(self):
-        cake = Cake.objects.create(name='Test cake', flavor='chocolate')
         delivery_date = (timezone.localdate() + timedelta(days=1)).isoformat()
 
         response = self.client.get(reverse('whatsapp_order'), {
-            'cake': cake.id,
+            'cake': self.cake.id,
             'weight_kg': '3',
             'delivery_date': delivery_date,
             'delivery_time': '16:45',
@@ -53,3 +55,21 @@ class WhatsappOrderTests(TestCase):
         message = parse_qs(urlparse(response.url).query)['text'][0]
         self.assertIn(f'تاريخ التسليم: {delivery_date}', message)
         self.assertIn('وقت التسليم: 16:45', message)
+
+    def test_missing_delivery_date_redirects_to_home(self):
+        response = self.client.get(reverse('whatsapp_order'), {
+            'cake': self.cake.id,
+            'weight_kg': '3',
+            'delivery_time': '16:45',
+        })
+
+        self.assertRedirects(response, reverse('home'))
+
+    def test_missing_delivery_time_redirects_to_home(self):
+        response = self.client.get(reverse('whatsapp_order'), {
+            'cake': self.cake.id,
+            'weight_kg': '3',
+            'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
+        })
+
+        self.assertRedirects(response, reverse('home'))

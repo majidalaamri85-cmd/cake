@@ -45,9 +45,13 @@ def whatsapp_order(request):
         weight_kg = '1'
     delivery_date = parse_date(request.GET.get('delivery_date', ''))
     if not delivery_date or delivery_date < timezone.localdate():
-        delivery_date = timezone.localdate()
+        messages.error(request, 'اختر يوم تسليم صحيحاً قبل المتابعة إلى واتساب.')
+        return redirect('home')
     delivery_time = parse_time(request.GET.get('delivery_time', ''))
-    delivery_time_display = delivery_time.strftime('%H:%M') if delivery_time else 'غير محدد'
+    if not delivery_time:
+        messages.error(request, 'اختر وقت التسليم قبل المتابعة إلى واتساب.')
+        return redirect('home')
+    delivery_time_display = delivery_time.strftime('%H:%M')
 
     total_price = int(weight_kg) * settings.CAKE_PRICE_PER_KG
     if cake.catalog_image:
