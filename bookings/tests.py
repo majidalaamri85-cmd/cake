@@ -55,7 +55,11 @@ class WhatsappOrderTests(TestCase):
         })
 
         self.assertEqual(response.status_code, 302)
-        message = parse_qs(urlparse(response.url).query)['text'][0]
+        whatsapp_url = urlparse(response.url)
+        query = parse_qs(whatsapp_url.query)
+        message = query['text'][0]
+        self.assertEqual(whatsapp_url.netloc, 'api.whatsapp.com')
+        self.assertEqual(query['phone'], ['96895066175'])
         self.assertIn(f'تاريخ التسليم: {delivery_date}', message)
         self.assertIn('وقت التسليم: 16:45', message)
         self.assertIn('الكتابة على الكعكة: كل عام وأنت بخير', message)

@@ -73,7 +73,7 @@ def whatsapp_order(request):
         'فضلاً أرسلوا لي تفاصيل التأكيد.'
     )
     phone = getattr(settings, 'BAKERY_WHATSAPP_PHONE', '').strip().replace('+', '')
-    return redirect(f'https://wa.me/{phone}?text={quote(message)}')
+    return redirect(f'https://api.whatsapp.com/send?phone={phone}&text={quote(message)}')
 
 
 @login_required
