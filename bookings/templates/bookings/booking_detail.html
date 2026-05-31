@@ -15,6 +15,7 @@
         <div class="row"><span>الكمية</span><strong>{{ booking.quantity }}</strong></div>
         <div class="row"><span>تاريخ التوصيل</span><strong>{{ booking.delivery_date }}</strong></div>
         <div class="row"><span>وقت التوصيل</span><strong>{{ booking.delivery_time|time:"H:i"|default:"غير محدد" }}</strong></div>
+        <div class="row"><span>الكتابة على الكعكة</span><strong>{{ booking.cake_message|default:"لا توجد كتابة" }}</strong></div>
         <div class="row"><span>العنوان</span><strong>{{ booking.delivery_address }}</strong></div>
         <div class="row"><span>حالة الدفع</span><strong>{{ booking.get_payment_status_display }}</strong></div>
         <div class="row"><span>المبلغ</span><strong class="price">{{ booking.total_price }} {{ currency }}</strong></div>

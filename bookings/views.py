@@ -52,6 +52,7 @@ def whatsapp_order(request):
         messages.error(request, 'اختر وقت التسليم قبل المتابعة إلى واتساب.')
         return redirect('home')
     delivery_time_display = delivery_time.strftime('%H:%M')
+    cake_message = request.GET.get('cake_message', '').strip()[:100] or 'لا توجد كتابة'
 
     total_price = int(weight_kg) * settings.CAKE_PRICE_PER_KG
     if cake.catalog_image:
@@ -66,6 +67,7 @@ def whatsapp_order(request):
         f'الوزن: {weight_kg} كجم\n'
         f'تاريخ التسليم: {delivery_date:%Y-%m-%d}\n'
         f'وقت التسليم: {delivery_time_display}\n'
+        f'الكتابة على الكعكة: {cake_message}\n'
         f'السعر التقريبي: {total_price} {settings.PAYMENT_CURRENCY}\n'
         f'صورة الكعكة: {product_url}\n'
         'فضلاً أرسلوا لي تفاصيل التأكيد.'
@@ -169,6 +171,7 @@ def send_booking_email(booking):
             f'مرحباً {booking.user.username}\n\n'
             f'تم استلام طلب {booking.cake.name} بوزن {booking.weight_kg} كجم.\n'
             f'موعد التسليم: {booking.delivery_date} - {format_delivery_time(booking)}.\n'
+            f'الكتابة على الكعكة: {booking.cake_message or "لا توجد كتابة"}.\n'
             f'المبلغ الإجمالي: {booking.total_price} {settings.PAYMENT_CURRENCY}.\n'
             'يرجى إكمال الدفع لتأكيد الحجز.'
         ),
@@ -186,6 +189,7 @@ def send_payment_email(booking):
         (
             f'مرحباً {booking.user.username}\n\n'
             f'تم تأكيد حجز {booking.cake.name} للتاريخ {booking.delivery_date} في الساعة {format_delivery_time(booking)}.\n'
+            f'الكتابة على الكعكة: {booking.cake_message or "لا توجد كتابة"}.\n'
             f'المبلغ المدفوع: {booking.total_price} {settings.PAYMENT_CURRENCY}.'
         ),
         settings.DEFAULT_FROM_EMAIL,

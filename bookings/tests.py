@@ -19,6 +19,7 @@ class BookingFormTests(TestCase):
             'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
             'delivery_time': '14:30',
             'delivery_address': 'Test address',
+            'cake_message': 'Happy birthday',
             'special_requests': '',
         }
 
@@ -35,6 +36,7 @@ class BookingFormTests(TestCase):
 
         self.assertTrue(form.is_valid())
         self.assertEqual(form.cleaned_data['delivery_time'].strftime('%H:%M'), '14:30')
+        self.assertEqual(form.cleaned_data['cake_message'], 'Happy birthday')
 
 
 class WhatsappOrderTests(TestCase):
@@ -49,12 +51,14 @@ class WhatsappOrderTests(TestCase):
             'weight_kg': '3',
             'delivery_date': delivery_date,
             'delivery_time': '16:45',
+            'cake_message': 'كل عام وأنت بخير',
         })
 
         self.assertEqual(response.status_code, 302)
         message = parse_qs(urlparse(response.url).query)['text'][0]
         self.assertIn(f'تاريخ التسليم: {delivery_date}', message)
         self.assertIn('وقت التسليم: 16:45', message)
+        self.assertIn('الكتابة على الكعكة: كل عام وأنت بخير', message)
 
     def test_missing_delivery_date_redirects_to_home(self):
         response = self.client.get(reverse('whatsapp_order'), {

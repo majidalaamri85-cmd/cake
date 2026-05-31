@@ -14,7 +14,7 @@ class CakeAdmin(admin.ModelAdmin):
 class BookingAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'cake', 'weight_kg', 'quantity', 'delivery_date', 'delivery_time', 'total_price', 'status', 'payment_status')
     list_filter = ('status', 'payment_status', 'delivery_date')
-    search_fields = ('user__username', 'user__email', 'cake__name', 'delivery_address')
+    search_fields = ('user__username', 'user__email', 'cake__name', 'delivery_address', 'cake_message')
     readonly_fields = ('total_price', 'created_at', 'updated_at')
 
 

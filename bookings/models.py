@@ -53,6 +53,7 @@ class Booking(models.Model):
     delivery_date = models.DateField(verbose_name='تاريخ الاستلام أو التوصيل')
     delivery_time = models.TimeField(null=True, verbose_name='وقت الاستلام أو التوصيل')
     delivery_address = models.TextField(verbose_name='العنوان')
+    cake_message = models.CharField(max_length=100, blank=True, verbose_name='الكتابة على الكعكة')
     special_requests = models.TextField(blank=True, verbose_name='طلبات خاصة')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='حالة الحجز')
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='unpaid', verbose_name='حالة الدفع')
