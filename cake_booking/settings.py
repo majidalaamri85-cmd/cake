@@ -48,18 +48,26 @@ default_debug = 'False' if os.environ.get('RENDER') else 'True'
 DEBUG = os.environ.get('DJANGO_DEBUG', default_debug).lower() in {'1', 'true', 'yes', 'on'}
 
 ALLOWED_HOSTS = [
+    'alraghef.com',
+    'www.alraghef.com',
+    *[
     host.strip()
     for host in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
     if host.strip()
+    ],
 ]
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://alraghef.com',
+    'https://www.alraghef.com',
+    *[
     origin.strip()
     for origin in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
     if origin.strip()
+    ],
 ]
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
