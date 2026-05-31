@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
 from django.utils import timezone
+from django.utils.dateparse import parse_date, parse_time
 
 from .forms import BookingForm, PaymentForm, RegisterForm
 from .models import Booking, Cake, Payment
@@ -20,6 +21,7 @@ def home(request):
         'cakes': cakes,
         'price_per_kg': settings.CAKE_PRICE_PER_KG,
         'currency': settings.PAYMENT_CURRENCY,
+        'today': timezone.localdate().isoformat(),
     })
 
 
@@ -41,6 +43,11 @@ def whatsapp_order(request):
     weight_kg = request.GET.get('weight_kg')
     if weight_kg not in {'1', '2', '3', '4', '5', '6'}:
         weight_kg = '1'
+    delivery_date = parse_date(request.GET.get('delivery_date', ''))
+    if not delivery_date or delivery_date < timezone.localdate():
+        delivery_date = timezone.localdate()
+    delivery_time = parse_time(request.GET.get('delivery_time', ''))
+    delivery_time_display = delivery_time.strftime('%H:%M') if delivery_time else 'غير محدد'
 
     total_price = int(weight_kg) * settings.CAKE_PRICE_PER_KG
     if cake.catalog_image:
@@ -53,6 +60,8 @@ def whatsapp_order(request):
         f'السلام عليكم، أريد طلب منتج من المخبز.\n'
         f'رقم الكعكة: {cake.id}\n'
         f'الوزن: {weight_kg} كجم\n'
+        f'تاريخ التسليم: {delivery_date:%Y-%m-%d}\n'
+        f'وقت التسليم: {delivery_time_display}\n'
         f'السعر التقريبي: {total_price} {settings.PAYMENT_CURRENCY}\n'
         f'صورة الكعكة: {product_url}\n'
         'فضلاً أرسلوا لي تفاصيل التأكيد.'
@@ -155,6 +164,7 @@ def send_booking_email(booking):
         (
             f'مرحباً {booking.user.username}\n\n'
             f'تم استلام طلب {booking.cake.name} بوزن {booking.weight_kg} كجم.\n'
+            f'موعد التسليم: {booking.delivery_date} - {format_delivery_time(booking)}.\n'
             f'المبلغ الإجمالي: {booking.total_price} {settings.PAYMENT_CURRENCY}.\n'
             'يرجى إكمال الدفع لتأكيد الحجز.'
         ),
@@ -171,10 +181,14 @@ def send_payment_email(booking):
         f'تم تأكيد دفع الحجز رقم {booking.id}',
         (
             f'مرحباً {booking.user.username}\n\n'
-            f'تم تأكيد حجز {booking.cake.name} للتاريخ {booking.delivery_date}.\n'
+            f'تم تأكيد حجز {booking.cake.name} للتاريخ {booking.delivery_date} في الساعة {format_delivery_time(booking)}.\n'
             f'المبلغ المدفوع: {booking.total_price} {settings.PAYMENT_CURRENCY}.'
         ),
         settings.DEFAULT_FROM_EMAIL,
         [booking.user.email],
         fail_silently=True,
     )
+
+
+def format_delivery_time(booking):
+    return booking.delivery_time.strftime('%H:%M') if booking.delivery_time else 'غير محدد'

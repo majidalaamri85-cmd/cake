@@ -27,12 +27,13 @@ class RegisterForm(UserCreationForm):
 class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
-        fields = ('cake', 'weight_kg', 'quantity', 'delivery_date', 'delivery_address', 'special_requests')
+        fields = ('cake', 'weight_kg', 'quantity', 'delivery_date', 'delivery_time', 'delivery_address', 'special_requests')
         widgets = {
             'cake': forms.Select(attrs={'class': 'form-select'}),
             'weight_kg': forms.Select(choices=WEIGHT_CHOICES, attrs={'class': 'form-control'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
             'delivery_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'delivery_time': forms.TimeInput(attrs={'class': 'form-control', 'type': 'time'}),
             'delivery_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'special_requests': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
@@ -41,6 +42,7 @@ class BookingForm(forms.ModelForm):
             'weight_kg': 'الوزن بالكيلو',
             'quantity': 'الكمية',
             'delivery_date': 'تاريخ الاستلام أو التوصيل',
+            'delivery_time': 'وقت الاستلام أو التوصيل',
             'delivery_address': 'العنوان',
             'special_requests': 'طلبات خاصة',
         }

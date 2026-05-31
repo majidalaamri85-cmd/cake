@@ -14,7 +14,7 @@
             <article class="card">
                 <div class="card-body">
                     <h2>{{ booking.cake.name }}</h2>
-                    <p class="muted">{{ booking.delivery_date }} - {{ booking.weight_kg }} كجم</p>
+                    <p class="muted">{{ booking.delivery_date }} - {{ booking.delivery_time|time:"H:i"|default:"غير محدد" }} - {{ booking.weight_kg }} كجم</p>
                     <p><span class="badge">{{ booking.get_status_display }}</span></p>
                     <p class="price">{{ booking.total_price }} {{ currency }}</p>
                     <div class="actions">

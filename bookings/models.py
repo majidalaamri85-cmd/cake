@@ -51,6 +51,7 @@ class Booking(models.Model):
     quantity = models.PositiveIntegerField(default=1, verbose_name='الكمية')
     total_price = models.DecimalField(max_digits=10, decimal_places=2, editable=False, verbose_name='المبلغ الإجمالي')
     delivery_date = models.DateField(verbose_name='تاريخ الاستلام أو التوصيل')
+    delivery_time = models.TimeField(null=True, verbose_name='وقت الاستلام أو التوصيل')
     delivery_address = models.TextField(verbose_name='العنوان')
     special_requests = models.TextField(blank=True, verbose_name='طلبات خاصة')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='حالة الحجز')

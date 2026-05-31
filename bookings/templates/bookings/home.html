@@ -33,6 +33,10 @@
                                 <option value="5">5 كجم</option>
                                 <option value="6">6 كجم</option>
                             </select>
+                            <label for="delivery-date-{{ cake.id }}">يوم التسليم</label>
+                            <input id="delivery-date-{{ cake.id }}" name="delivery_date" type="date" value="{{ today }}" min="{{ today }}" required>
+                            <label for="delivery-time-{{ cake.id }}">وقت التسليم</label>
+                            <input id="delivery-time-{{ cake.id }}" name="delivery_time" type="time" required>
                             <div class="booking-actions">
                                 <button class="btn btn-whatsapp" type="submit" aria-label="الحجز عبر واتساب من الهاتف">
                                     <span class="whatsapp-icon" aria-hidden="true">

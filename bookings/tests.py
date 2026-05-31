@@ -1,3 +1,55 @@
-from django.test import TestCase
+from datetime import timedelta
+from urllib.parse import parse_qs, urlparse
 
-# Create your tests here.
+from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
+
+from .forms import BookingForm
+from .models import Cake
+
+
+class BookingFormTests(TestCase):
+    def setUp(self):
+        self.cake = Cake.objects.create(name='Test cake', flavor='vanilla')
+        self.data = {
+            'cake': self.cake.id,
+            'weight_kg': '2',
+            'quantity': '1',
+            'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
+            'delivery_time': '14:30',
+            'delivery_address': 'Test address',
+            'special_requests': '',
+        }
+
+    def test_delivery_time_is_required(self):
+        self.data['delivery_time'] = ''
+
+        form = BookingForm(data=self.data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('delivery_time', form.errors)
+
+    def test_delivery_time_is_accepted(self):
+        form = BookingForm(data=self.data)
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data['delivery_time'].strftime('%H:%M'), '14:30')
+
+
+class WhatsappOrderTests(TestCase):
+    def test_delivery_date_and_time_are_included_in_whatsapp_message(self):
+        cake = Cake.objects.create(name='Test cake', flavor='chocolate')
+        delivery_date = (timezone.localdate() + timedelta(days=1)).isoformat()
+
+        response = self.client.get(reverse('whatsapp_order'), {
+            'cake': cake.id,
+            'weight_kg': '3',
+            'delivery_date': delivery_date,
+            'delivery_time': '16:45',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        message = parse_qs(urlparse(response.url).query)['text'][0]
+        self.assertIn(f'تاريخ التسليم: {delivery_date}', message)
+        self.assertIn('وقت التسليم: 16:45', message)
