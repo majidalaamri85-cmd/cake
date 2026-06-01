@@ -19,19 +19,16 @@
                             {{ cake.name|first }}
                         {% endif %}
                         <span class="cake-number">رقم الكعكة: {{ cake.id }}</span>
-                        <span class="image-price">{{ price_per_kg }} {{ currency }} / كيلو</span>
+                        <span class="image-price">يبدأ من {{ price_per_kg }} {{ currency }}</span>
                     </div>
                     <div class="card-body">
                         <form class="quick-book" method="get" action="{% url 'whatsapp_order' %}">
                             <input type="hidden" name="cake" value="{{ cake.id }}">
                             <label for="weight-{{ cake.id }}">اختيار الوزن</label>
                             <select id="weight-{{ cake.id }}" name="weight_kg">
-                                <option value="1">1 كجم</option>
-                                <option value="2">2 كجم</option>
-                                <option value="3">3 كجم</option>
-                                <option value="4">4 كجم</option>
-                                <option value="5">5 كجم</option>
-                                <option value="6">6 كجم</option>
+                                {% for value, label in weight_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
                             </select>
                             <label for="delivery-date-{{ cake.id }}">يوم التسليم</label>
                             <input id="delivery-date-{{ cake.id }}" name="delivery_date" type="date" min="{{ today }}" required>

@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 from urllib.parse import quote
 
 from django.conf import settings
@@ -11,7 +12,7 @@ from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_time
 
-from .forms import BookingForm, PaymentForm, RegisterForm
+from .forms import WEIGHT_CHOICES, BookingForm, PaymentForm, RegisterForm
 from .models import Booking, Cake, Payment
 
 
@@ -19,6 +20,7 @@ def home(request):
     cakes = Cake.objects.filter(is_available=True).order_by('id')
     return render(request, 'bookings/home.html', {
         'cakes': cakes,
+        'weight_choices': WEIGHT_CHOICES,
         'price_per_kg': settings.CAKE_PRICE_PER_KG,
         'currency': settings.PAYMENT_CURRENCY,
         'today': timezone.localdate().isoformat(),
@@ -41,8 +43,9 @@ def register(request):
 def whatsapp_order(request):
     cake = get_object_or_404(Cake, id=request.GET.get('cake'), is_available=True)
     weight_kg = request.GET.get('weight_kg')
-    if weight_kg not in {'1', '2', '3', '4', '5', '6'}:
-        weight_kg = '1'
+    valid_weights = {value for value, _label in WEIGHT_CHOICES}
+    if weight_kg not in valid_weights:
+        weight_kg = '0.5'
     delivery_date = parse_date(request.GET.get('delivery_date', ''))
     if not delivery_date or delivery_date < timezone.localdate():
         messages.error(request, 'اختر يوم تسليم صحيحاً قبل المتابعة إلى واتساب.')
@@ -54,7 +57,7 @@ def whatsapp_order(request):
     delivery_time_display = delivery_time.strftime('%H:%M')
     cake_message = request.GET.get('cake_message', '').strip()[:100] or 'لا توجد كتابة'
 
-    total_price = int(weight_kg) * settings.CAKE_PRICE_PER_KG
+    total_price = Decimal(weight_kg) * settings.CAKE_PRICE_PER_KG
     if cake.catalog_image:
         product_url = request.build_absolute_uri(static(cake.catalog_image))
     elif cake.image:
@@ -83,7 +86,7 @@ def create_booking(request):
     weight_kg = request.GET.get('weight_kg')
     if cake_id:
         initial['cake'] = cake_id
-    if weight_kg in {'1', '2', '3', '4', '5', '6'}:
+    if weight_kg in {value for value, _label in WEIGHT_CHOICES}:
         initial['weight_kg'] = weight_kg
 
     if request.method == 'POST':

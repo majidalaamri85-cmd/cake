@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+from decimal import Decimal
 from pathlib import Path
 
 import dj_database_url
@@ -197,7 +198,7 @@ LOGIN_URL = 'login'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'bookings@example.com'
 
-CAKE_PRICE_PER_KG = 4
+CAKE_PRICE_PER_KG = Decimal('4.900')
 PAYMENT_CURRENCY = 'ريال'
 PAYMENT_PROVIDER = 'thawani'
 BAKERY_WHATSAPP_PHONE = '96895066175'

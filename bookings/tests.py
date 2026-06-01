@@ -1,4 +1,5 @@
 from datetime import timedelta
+from decimal import Decimal
 from urllib.parse import parse_qs, urlparse
 
 from django.test import TestCase
@@ -20,6 +21,14 @@ class HomeTests(TestCase):
         self.assertEqual(
             list(response.context['cakes'].values_list('id', flat=True)),
             [first_cake.id, second_cake.id],
+        )
+
+    def test_weight_choices_start_at_half_kilo_and_increase_by_half_kilo(self):
+        response = self.client.get(reverse('home'))
+
+        self.assertEqual(
+            [value for value, _label in response.context['weight_choices']],
+            ['0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6'],
         )
 
 
@@ -86,6 +95,18 @@ class WhatsappOrderTests(TestCase):
         })
 
         self.assertRedirects(response, reverse('home'))
+
+    def test_half_kilo_weight_is_included_in_whatsapp_message(self):
+        response = self.client.get(reverse('whatsapp_order'), {
+            'cake': self.cake.id,
+            'weight_kg': '0.5',
+            'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
+            'delivery_time': '16:45',
+        })
+
+        message = parse_qs(urlparse(response.url).query)['text'][0]
+        self.assertIn('0.5', message)
+        self.assertIn(str(Decimal('0.5') * Decimal('4.900')), message)
 
     def test_missing_delivery_time_redirects_to_home(self):
         response = self.client.get(reverse('whatsapp_order'), {

@@ -6,7 +6,10 @@ from django.utils import timezone
 from .models import Booking, Cake
 
 
-WEIGHT_CHOICES = [(value, f'{value} كجم') for value in range(1, 7)]
+WEIGHT_CHOICES = [
+    (f'{half_kilo / 2:g}', f'{half_kilo / 2:g} كجم')
+    for half_kilo in range(1, 13)
+]
 
 
 class RegisterForm(UserCreationForm):
