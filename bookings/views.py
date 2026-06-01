@@ -21,7 +21,7 @@ def home(request):
     return render(request, 'bookings/home.html', {
         'cakes': cakes,
         'weight_choices': WEIGHT_CHOICES,
-        'price_per_kg': settings.CAKE_PRICE_PER_KG,
+        'price_per_kg': f'{settings.CAKE_PRICE_PER_KG:.3f}',
         'currency': settings.PAYMENT_CURRENCY,
         'today': timezone.localdate().isoformat(),
     })
@@ -57,7 +57,7 @@ def whatsapp_order(request):
     delivery_time_display = delivery_time.strftime('%H:%M')
     cake_message = request.GET.get('cake_message', '').strip()[:100] or 'لا توجد كتابة'
 
-    total_price = Decimal(weight_kg) * settings.CAKE_PRICE_PER_KG
+    total_price = Decimal(weight_kg) * cake.price_per_kg
     if cake.catalog_image:
         product_url = request.build_absolute_uri(static(cake.catalog_image))
     elif cake.image:
@@ -103,7 +103,11 @@ def create_booking(request):
 
     return render(request, 'bookings/create_booking.html', {
         'form': form,
-        'price_per_kg': settings.CAKE_PRICE_PER_KG,
+        'price_per_kg': f'{settings.CAKE_PRICE_PER_KG:.3f}',
+        'cake_prices': {
+            str(cake.id): str(cake.price_per_kg)
+            for cake in Cake.objects.filter(is_available=True)
+        },
         'currency': settings.PAYMENT_CURRENCY,
     })
 

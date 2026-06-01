@@ -31,6 +31,20 @@ class HomeTests(TestCase):
             ['0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5', '5.5', '6'],
         )
 
+    def test_first_cake_uses_special_starting_price(self):
+        cake = Cake.objects.get(id=1)
+
+        response = self.client.get(reverse('home'))
+
+        self.assertContains(response, f'يبدأ من {cake.price_per_kg} ريال')
+
+    def test_twelfth_cake_uses_special_starting_price(self):
+        cake = Cake.objects.get(id=12)
+
+        response = self.client.get(reverse('home'))
+
+        self.assertContains(response, f'يبدأ من {cake.price_per_kg} ريال')
+
 
 class BookingFormTests(TestCase):
     def setUp(self):
@@ -106,7 +120,7 @@ class WhatsappOrderTests(TestCase):
 
         message = parse_qs(urlparse(response.url).query)['text'][0]
         self.assertIn('0.5', message)
-        self.assertIn(str(Decimal('0.5') * Decimal('4.900')), message)
+        self.assertIn(str(Decimal('0.5') * self.cake.price_per_kg), message)
 
     def test_missing_delivery_time_redirects_to_home(self):
         response = self.client.get(reverse('whatsapp_order'), {

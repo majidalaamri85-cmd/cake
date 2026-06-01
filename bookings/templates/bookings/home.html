@@ -19,7 +19,7 @@
                             {{ cake.name|first }}
                         {% endif %}
                         <span class="cake-number">رقم الكعكة: {{ cake.id }}</span>
-                        <span class="image-price">يبدأ من {{ price_per_kg }} {{ currency }}</span>
+                        <span class="image-price">يبدأ من {{ cake.price_per_kg_display }} {{ currency }}</span>
                     </div>
                     <div class="card-body">
                         <form class="quick-book" method="get" action="{% url 'whatsapp_order' %}">

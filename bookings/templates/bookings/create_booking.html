@@ -7,7 +7,7 @@
     <section class="panel">
         <div class="section-head">
             <h1>حجز كعكة جديدة</h1>
-            <span class="badge">{{ price_per_kg }} {{ currency }} / كجم</span>
+            <span class="badge"><span id="price-per-kg">{{ price_per_kg }}</span> {{ currency }} / كجم</span>
         </div>
 
         <form method="post" class="form-grid" id="booking-form" data-price="{{ price_per_kg }}">
@@ -36,18 +36,24 @@
 </div>
 
 <script>
+    {{ cake_prices|json_script:"cake-prices" }}
     const form = document.getElementById('booking-form');
+    const cake = document.getElementById('id_cake');
     const weight = document.getElementById('id_weight_kg');
     const quantity = document.getElementById('id_quantity');
     const total = document.getElementById('live-total');
-    const price = Number(form.dataset.price || 0);
+    const pricePerKg = document.getElementById('price-per-kg');
+    const cakePrices = JSON.parse(document.getElementById('cake-prices').textContent);
 
     function updateTotal() {
         const kg = Number(weight.value || 0);
         const qty = Number(quantity.value || 1);
-    total.textContent = `${(kg * qty * price).toFixed(2)} {{ currency }}`;
+        const price = Number(cakePrices[cake.value] || form.dataset.price || 0);
+        pricePerKg.textContent = price.toFixed(3);
+        total.textContent = `${(kg * qty * price).toFixed(3)} {{ currency }}`;
     }
 
+    cake.addEventListener('change', updateTotal);
     weight.addEventListener('change', updateTotal);
     quantity.addEventListener('input', updateTotal);
     updateTotal();

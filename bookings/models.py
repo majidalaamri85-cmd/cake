@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -30,6 +28,14 @@ class Cake(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def price_per_kg(self):
+        return settings.CAKE_SPECIAL_PRICES_PER_KG.get(self.id, settings.CAKE_PRICE_PER_KG)
+
+    @property
+    def price_per_kg_display(self):
+        return f'{self.price_per_kg:.3f}'
 
 
 class Booking(models.Model):
@@ -66,8 +72,7 @@ class Booking(models.Model):
         ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
-        price_per_kg = Decimal(str(getattr(settings, 'CAKE_PRICE_PER_KG', 50)))
-        self.total_price = self.weight_kg * self.quantity * price_per_kg
+        self.total_price = self.weight_kg * self.quantity * self.cake.price_per_kg
         super().save(*args, **kwargs)
 
     def __str__(self):
