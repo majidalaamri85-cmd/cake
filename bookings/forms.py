@@ -62,6 +62,19 @@ class BookingForm(forms.ModelForm):
             raise forms.ValidationError('اختر تاريخاً اليوم أو بعده.')
         return delivery_date
 
+    def clean_weight_kg(self):
+        weight_kg = self.cleaned_data['weight_kg']
+        valid_weights = {value for value, _label in WEIGHT_CHOICES}
+        if f'{weight_kg:g}' not in valid_weights:
+            raise forms.ValidationError('اختر وزناً من القائمة المتاحة.')
+        return weight_kg
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data['quantity']
+        if quantity < 1:
+            raise forms.ValidationError('يجب أن تكون الكمية 1 أو أكثر.')
+        return quantity
+
 
 class PaymentForm(forms.Form):
     PAYMENT_METHODS = [

@@ -118,6 +118,22 @@ class BookingFormTests(TestCase):
         self.assertEqual(form.cleaned_data['delivery_time'].strftime('%H:%M'), '14:30')
         self.assertEqual(form.cleaned_data['cake_message'], 'Happy birthday')
 
+    def test_weight_must_match_available_choices(self):
+        self.data['weight_kg'] = '99.99'
+
+        form = BookingForm(data=self.data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('weight_kg', form.errors)
+
+    def test_quantity_must_be_at_least_one(self):
+        self.data['quantity'] = '0'
+
+        form = BookingForm(data=self.data)
+
+        self.assertFalse(form.is_valid())
+        self.assertIn('quantity', form.errors)
+
 
 class WhatsappOrderTests(TestCase):
     def setUp(self):
@@ -170,6 +186,16 @@ class WhatsappOrderTests(TestCase):
             'cake': self.cake.id,
             'weight_kg': '3',
             'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
+        })
+
+        self.assertRedirects(response, reverse('home'))
+
+    def test_invalid_weight_redirects_to_home(self):
+        response = self.client.get(reverse('whatsapp_order'), {
+            'cake': self.cake.id,
+            'weight_kg': '99.99',
+            'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
+            'delivery_time': '16:45',
         })
 
         self.assertRedirects(response, reverse('home'))

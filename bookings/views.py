@@ -28,8 +28,7 @@ def home(request):
 
 
 def catalog_number_for_cake(cake):
-    available_ids = list(Cake.objects.filter(is_available=True).order_by('id').values_list('id', flat=True))
-    return available_ids.index(cake.id) + 1
+    return Cake.objects.filter(is_available=True, id__lte=cake.id).count()
 
 
 def register(request):
@@ -51,7 +50,8 @@ def whatsapp_order(request):
     weight_kg = request.GET.get('weight_kg')
     valid_weights = {value for value, _label in WEIGHT_CHOICES}
     if weight_kg not in valid_weights:
-        weight_kg = '0.5'
+        messages.error(request, 'اختر وزناً صحيحاً قبل المتابعة إلى واتساب.')
+        return redirect('home')
     delivery_date = parse_date(request.GET.get('delivery_date', ''))
     if not delivery_date or delivery_date < timezone.localdate():
         messages.error(request, 'اختر يوم تسليم صحيحاً قبل المتابعة إلى واتساب.')
