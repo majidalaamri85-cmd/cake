@@ -76,6 +76,11 @@ class HomeTests(TestCase):
             self.assertEqual(cake.price_per_kg, Decimal('4.900'))
             self.assertContains(response, f'يبدأ من {cake.price_per_kg_display} ريال')
 
+    def test_seventh_cake_is_hidden_from_home(self):
+        response = self.client.get(reverse('home'))
+
+        self.assertNotIn(7, list(response.context['cakes'].values_list('id', flat=True)))
+
 
 class BookingFormTests(TestCase):
     def setUp(self):
@@ -161,3 +166,15 @@ class WhatsappOrderTests(TestCase):
         })
 
         self.assertRedirects(response, reverse('home'))
+
+    def test_unavailable_cake_cannot_be_ordered_through_whatsapp(self):
+        Cake.objects.filter(id=7).update(is_available=False)
+
+        response = self.client.get(reverse('whatsapp_order'), {
+            'cake': 7,
+            'weight_kg': '1',
+            'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
+            'delivery_time': '16:45',
+        })
+
+        self.assertEqual(response.status_code, 404)
