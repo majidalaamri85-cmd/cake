@@ -27,6 +27,11 @@ def home(request):
     })
 
 
+def catalog_number_for_cake(cake):
+    available_ids = list(Cake.objects.filter(is_available=True).order_by('id').values_list('id', flat=True))
+    return available_ids.index(cake.id) + 1
+
+
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -42,6 +47,7 @@ def register(request):
 
 def whatsapp_order(request):
     cake = get_object_or_404(Cake, id=request.GET.get('cake'), is_available=True)
+    catalog_number = catalog_number_for_cake(cake)
     weight_kg = request.GET.get('weight_kg')
     valid_weights = {value for value, _label in WEIGHT_CHOICES}
     if weight_kg not in valid_weights:
@@ -66,7 +72,7 @@ def whatsapp_order(request):
         product_url = request.build_absolute_uri('/')
     message = (
         f'السلام عليكم، أريد طلب منتج من المخبز.\n'
-        f'رقم الكعكة: {cake.id}\n'
+        f'رقم الكعكة: {catalog_number}\n'
         f'الوزن: {weight_kg} كجم\n'
         f'تاريخ التسليم: {delivery_date:%Y-%m-%d}\n'
         f'وقت التسليم: {delivery_time_display}\n'

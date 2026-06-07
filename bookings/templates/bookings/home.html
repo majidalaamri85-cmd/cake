@@ -18,7 +18,7 @@
                         {% else %}
                             {{ cake.name|first }}
                         {% endif %}
-                        <span class="cake-number">رقم الكعكة: {{ cake.id }}</span>
+                        <span class="cake-number">رقم الكعكة: {{ forloop.counter }}</span>
                         <span class="image-price">يبدأ من {{ cake.price_per_kg_display }} {{ currency }}</span>
                     </div>
                     <div class="card-body">

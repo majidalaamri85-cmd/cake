@@ -81,6 +81,13 @@ class HomeTests(TestCase):
 
         self.assertNotIn(7, list(response.context['cakes'].values_list('id', flat=True)))
 
+    def test_cake_numbers_are_resequenced_after_hidden_cake(self):
+        response = self.client.get(reverse('home'))
+        visible_cakes = list(response.context['cakes'])
+
+        self.assertEqual(visible_cakes[6].id, 8)
+        self.assertContains(response, 'رقم الكعكة: 7')
+
 
 class BookingFormTests(TestCase):
     def setUp(self):
@@ -178,3 +185,16 @@ class WhatsappOrderTests(TestCase):
         })
 
         self.assertEqual(response.status_code, 404)
+
+    def test_whatsapp_message_uses_visible_catalog_number(self):
+        cake = Cake.objects.get(id=8)
+
+        response = self.client.get(reverse('whatsapp_order'), {
+            'cake': cake.id,
+            'weight_kg': '1',
+            'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
+            'delivery_time': '16:45',
+        })
+
+        message = parse_qs(urlparse(response.url).query)['text'][0]
+        self.assertIn('رقم الكعكة: 7', message)
