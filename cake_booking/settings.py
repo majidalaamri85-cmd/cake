@@ -202,6 +202,15 @@ CAKE_PRICE_PER_KG = Decimal('4.900')
 CAKE_SPECIAL_PRICES_PER_KG = {
     1: Decimal('5.900'),
     12: Decimal('6.900'),
+    15: Decimal('5.900'),
+    17: Decimal('5.900'),
+    18: Decimal('5.900'),
+    19: Decimal('5.900'),
+    26: Decimal('5.900'),
+    27: Decimal('5.900'),
+}
+CAKE_SPECIAL_CATALOG_IMAGE_PRICES_PER_KG = {
+    'images/cakes/product-52.jpeg': Decimal('5.900'),
 }
 PAYMENT_CURRENCY = 'ريال'
 PAYMENT_PROVIDER = 'thawani'

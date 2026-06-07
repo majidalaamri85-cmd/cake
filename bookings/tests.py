@@ -2,7 +2,7 @@ from datetime import timedelta
 from decimal import Decimal
 from urllib.parse import parse_qs, urlparse
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -10,6 +10,14 @@ from .forms import BookingForm
 from .models import Cake
 
 
+@override_settings(STORAGES={
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+})
 class HomeTests(TestCase):
     def test_cakes_are_ordered_by_number(self):
         Cake.objects.update(is_available=False)
@@ -44,6 +52,29 @@ class HomeTests(TestCase):
         response = self.client.get(reverse('home'))
 
         self.assertContains(response, f'يبدأ من {cake.price_per_kg} ريال')
+
+    def test_selected_cakes_use_five_nine_hundred_starting_price(self):
+        response = self.client.get(reverse('home'))
+
+        for cake_id in [15, 17, 18, 19, 26, 27]:
+            cake = Cake.objects.get(id=cake_id)
+            self.assertEqual(cake.price_per_kg, Decimal('5.900'))
+            self.assertContains(response, f'يبدأ من {cake.price_per_kg_display} ريال')
+
+        spongebob_cake = Cake.objects.get(catalog_image='images/cakes/product-52.jpeg')
+        self.assertEqual(spongebob_cake.price_per_kg, Decimal('5.900'))
+        self.assertContains(response, f'يبدأ من {spongebob_cake.price_per_kg_display} ريال')
+
+    def test_new_catalog_cakes_use_default_starting_price(self):
+        response = self.client.get(reverse('home'))
+        new_images = [f'images/cakes/product-{number}.jpeg' for number in range(46, 52)]
+
+        cakes = Cake.objects.filter(catalog_image__in=new_images)
+
+        self.assertEqual(cakes.count(), 6)
+        for cake in cakes:
+            self.assertEqual(cake.price_per_kg, Decimal('4.900'))
+            self.assertContains(response, f'يبدأ من {cake.price_per_kg_display} ريال')
 
 
 class BookingFormTests(TestCase):

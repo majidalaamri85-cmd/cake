@@ -31,7 +31,11 @@ class Cake(models.Model):
 
     @property
     def price_per_kg(self):
-        return settings.CAKE_SPECIAL_PRICES_PER_KG.get(self.id, settings.CAKE_PRICE_PER_KG)
+        return (
+            settings.CAKE_SPECIAL_PRICES_PER_KG.get(self.id)
+            or settings.CAKE_SPECIAL_CATALOG_IMAGE_PRICES_PER_KG.get(self.catalog_image)
+            or settings.CAKE_PRICE_PER_KG
+        )
 
     @property
     def price_per_kg_display(self):
