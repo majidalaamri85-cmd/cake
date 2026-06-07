@@ -1,7 +1,9 @@
 from datetime import timedelta
 from decimal import Decimal
+from tempfile import TemporaryDirectory
 from urllib.parse import parse_qs, urlparse
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -56,7 +58,7 @@ class HomeTests(TestCase):
     def test_selected_cakes_use_five_nine_hundred_starting_price(self):
         response = self.client.get(reverse('home'))
 
-        for cake_id in [5, 6, 8, 15, 17, 18, 19, 26, 27]:
+        for cake_id in [5, 6, 8, 17, 18, 19]:
             cake = Cake.objects.get(id=cake_id)
             self.assertEqual(cake.price_per_kg, Decimal('5.900'))
             self.assertContains(response, f'يبدأ من {cake.price_per_kg_display} ريال')
@@ -64,6 +66,21 @@ class HomeTests(TestCase):
         spongebob_cake = Cake.objects.get(catalog_image='images/cakes/product-52.jpeg')
         self.assertEqual(spongebob_cake.price_per_kg, Decimal('5.900'))
         self.assertContains(response, f'يبدأ من {spongebob_cake.price_per_kg_display} ريال')
+
+    def test_customer_numbered_cakes_use_requested_starting_prices(self):
+        response = self.client.get(reverse('home'))
+        visible_cakes = list(response.context['cakes'])
+        requested_prices = {
+            14: Decimal('6.900'),
+            25: Decimal('8.900'),
+            26: Decimal('8.900'),
+            28: Decimal('6.900'),
+        }
+
+        for catalog_number, expected_price in requested_prices.items():
+            cake = visible_cakes[catalog_number - 1]
+            self.assertEqual(cake.price_per_kg, expected_price)
+            self.assertContains(response, f'يبدأ من {cake.price_per_kg_display} ريال')
 
     def test_new_catalog_cakes_use_default_starting_price(self):
         response = self.client.get(reverse('home'))
@@ -224,3 +241,27 @@ class WhatsappOrderTests(TestCase):
 
         message = parse_qs(urlparse(response.url).query)['text'][0]
         self.assertIn('رقم الكعكة: 7', message)
+
+    def test_custom_cake_design_sends_image_weight_and_details_to_whatsapp(self):
+        image = SimpleUploadedFile(
+            'design.jpg',
+            b'custom cake image',
+            content_type='image/jpeg',
+        )
+
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            response = self.client.post(reverse('custom_cake_order'), {
+                'reference_image': image,
+                'weight_kg': '2.5',
+                'details': 'تصميم وردي مع اسم لينا',
+            })
+
+        self.assertEqual(response.status_code, 302)
+        whatsapp_url = urlparse(response.url)
+        query = parse_qs(whatsapp_url.query)
+        message = query['text'][0]
+        self.assertEqual(whatsapp_url.netloc, 'api.whatsapp.com')
+        self.assertIn('صمم كعكتك حسب رغبتك', message)
+        self.assertIn('الوزن: 2.5 كجم', message)
+        self.assertIn('تصميم وردي مع اسم لينا', message)
+        self.assertIn('/custom-cake-image/custom-cakes/', message)

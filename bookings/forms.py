@@ -12,6 +12,28 @@ WEIGHT_CHOICES = [
 ]
 
 
+class CustomCakeDesignForm(forms.Form):
+    reference_image = forms.FileField(
+        label='صورة الكعكة',
+        widget=forms.ClearableFileInput(attrs={'accept': 'image/*'}),
+    )
+    weight_kg = forms.ChoiceField(
+        choices=WEIGHT_CHOICES,
+        label='الوزن',
+    )
+    details = forms.CharField(
+        label='التفاصيل',
+        max_length=700,
+        widget=forms.Textarea(attrs={'rows': 4}),
+    )
+
+    def clean_reference_image(self):
+        image = self.cleaned_data['reference_image']
+        if not getattr(image, 'content_type', '').startswith('image/'):
+            raise forms.ValidationError('ارفع صورة للكعكة فقط.')
+        return image
+
+
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=False, label='البريد الإلكتروني')
 

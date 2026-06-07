@@ -7,12 +7,16 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail
+from django.core.files.storage import default_storage
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.templatetags.static import static
+from django.urls import reverse
+from django.utils.text import get_valid_filename
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_time
 
-from .forms import WEIGHT_CHOICES, BookingForm, PaymentForm, RegisterForm
+from .forms import CustomCakeDesignForm, WEIGHT_CHOICES, BookingForm, PaymentForm, RegisterForm
 from .models import Booking, Cake, Payment
 
 
@@ -20,6 +24,7 @@ def home(request):
     cakes = Cake.objects.filter(is_available=True).order_by('id')
     return render(request, 'bookings/home.html', {
         'cakes': cakes,
+        'custom_cake_form': CustomCakeDesignForm(),
         'weight_choices': WEIGHT_CHOICES,
         'price_per_kg': f'{settings.CAKE_PRICE_PER_KG:.3f}',
         'currency': settings.PAYMENT_CURRENCY,
@@ -29,6 +34,41 @@ def home(request):
 
 def catalog_number_for_cake(cake):
     return Cake.objects.filter(is_available=True, id__lte=cake.id).count()
+
+
+def custom_cake_order(request):
+    if request.method != 'POST':
+        return redirect('home')
+
+    form = CustomCakeDesignForm(request.POST, request.FILES)
+    if not form.is_valid():
+        messages.error(request, 'ارفع صورة للكعكة واختر الوزن واكتب التفاصيل قبل الإرسال إلى واتساب.')
+        return redirect('home')
+
+    reference_image = form.cleaned_data['reference_image']
+    filename = get_valid_filename(reference_image.name)
+    image_path = default_storage.save(f'custom-cakes/{uuid.uuid4()}-{filename}', reference_image)
+    image_url = request.build_absolute_uri(
+        reverse('custom_cake_image', kwargs={'path': image_path})
+    )
+    message = (
+        'السلام عليكم، أريد طلب كعكة مخصصة.\n'
+        'صمم كعكتك حسب رغبتك\n'
+        f'الوزن: {form.cleaned_data["weight_kg"]} كجم\n'
+        f'التفاصيل: {form.cleaned_data["details"]}\n'
+        f'صورة التصميم: {image_url}\n'
+        'فضلا أرسلوا لي تفاصيل التأكيد والسعر.'
+    )
+    phone = getattr(settings, 'BAKERY_WHATSAPP_PHONE', '').strip().replace('+', '')
+    return redirect(f'https://api.whatsapp.com/send?phone={phone}&text={quote(message)}')
+
+
+def custom_cake_image(request, path):
+    if not path.startswith('custom-cakes/'):
+        raise Http404
+    if not default_storage.exists(path):
+        raise Http404
+    return FileResponse(default_storage.open(path, 'rb'))
 
 
 def register(request):

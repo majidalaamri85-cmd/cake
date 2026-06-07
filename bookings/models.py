@@ -31,8 +31,12 @@ class Cake(models.Model):
 
     @property
     def price_per_kg(self):
+        catalog_number = None
+        if self.id:
+            catalog_number = Cake.objects.filter(is_available=True, id__lte=self.id).count()
         return (
-            settings.CAKE_SPECIAL_PRICES_PER_KG.get(self.id)
+            settings.CAKE_SPECIAL_CATALOG_NUMBER_PRICES_PER_KG.get(catalog_number)
+            or settings.CAKE_SPECIAL_PRICES_PER_KG.get(self.id)
             or settings.CAKE_SPECIAL_CATALOG_IMAGE_PRICES_PER_KG.get(self.catalog_image)
             or settings.CAKE_PRICE_PER_KG
         )

@@ -4,6 +4,34 @@
 {% block title %}أسواق ومخبز الرغيف الطازج{% endblock %}
 
 {% block content %}
+<section class="section custom-cake-section" id="custom-cake">
+    <div class="custom-cake-panel">
+        <div class="custom-cake-copy">
+            <span class="custom-cake-kicker">طلب خاص</span>
+            <h2>صمم كعكتك حسب رغبتك</h2>
+        </div>
+        <form class="quick-book custom-cake-form" method="post" action="{% url 'custom_cake_order' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="{{ custom_cake_form.reference_image.id_for_label }}">رفع صورة الكعكة</label>
+            {{ custom_cake_form.reference_image }}
+            <label for="{{ custom_cake_form.weight_kg.id_for_label }}">اختيار الوزن</label>
+            {{ custom_cake_form.weight_kg }}
+            <label for="{{ custom_cake_form.details.id_for_label }}">التفاصيل</label>
+            {{ custom_cake_form.details }}
+            <div class="booking-actions">
+                <button class="btn btn-whatsapp" type="submit" aria-label="إرسال تصميم الكعكة عبر واتساب">
+                    <span class="whatsapp-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" focusable="false">
+                            <path d="M12 3.6a8.2 8.2 0 0 0-7 12.5l-.9 3.3 3.4-.9A8.2 8.2 0 1 0 12 3.6Zm0 1.8a6.4 6.4 0 1 1-3.3 11.9l-.4-.2-1.8.5.5-1.7-.3-.5A6.4 6.4 0 0 1 12 5.4Zm-2.2 3.4c-.2 0-.4.1-.6.3-.2.3-.7.8-.7 1.8s.7 2 1 2.4c.1.1 1.5 2.3 3.8 3.1 1.9.8 2.3.6 2.7.6.4-.1 1.3-.6 1.5-1.1.2-.5.2-1 .1-1.1s-.2-.2-.5-.3l-1.5-.7c-.2-.1-.4-.1-.6.2l-.6.8c-.1.2-.3.2-.5.1-.3-.1-1-.4-1.8-1.1-.7-.6-1.1-1.3-1.2-1.6-.2-.2 0-.4.1-.5l.4-.4c.1-.2.2-.3.3-.5.1-.2.1-.3 0-.5l-.7-1.5c-.2-.4-.4-.4-.6-.4h-.6Z" />
+                        </svg>
+                    </span>
+                    إرسال بالواتس اب
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
 <section class="section products-section" id="products">
     {% if cakes %}
         <div class="grid">

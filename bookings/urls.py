@@ -9,6 +9,8 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('whatsapp-order/', views.whatsapp_order, name='whatsapp_order'),
+    path('custom-cake-order/', views.custom_cake_order, name='custom_cake_order'),
+    path('custom-cake-image/<path:path>/', views.custom_cake_image, name='custom_cake_image'),
     path('booking/new/', views.create_booking, name='create_booking'),
     path('booking/<int:booking_id>/', views.booking_detail, name='booking_detail'),
     path('booking/<int:booking_id>/payment/', views.payment_view, name='payment'),
