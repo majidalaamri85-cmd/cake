@@ -205,7 +205,7 @@ CAKE_SPECIAL_PRICES_PER_KG = {
 }
 PAYMENT_CURRENCY = 'ريال'
 PAYMENT_PROVIDER = 'thawani'
-BAKERY_WHATSAPP_PHONE = '96895066175'
+BAKERY_WHATSAPP_PHONE = '96894032727'
 OMAN_BANK_TRANSFER_DETAILS = {
     'bank_name': 'Bank Muscat / بنك مسقط',
     'account_name': 'Cake Booking',
