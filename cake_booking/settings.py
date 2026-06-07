@@ -201,6 +201,9 @@ DEFAULT_FROM_EMAIL = 'bookings@example.com'
 CAKE_PRICE_PER_KG = Decimal('4.900')
 CAKE_SPECIAL_PRICES_PER_KG = {
     1: Decimal('5.900'),
+    5: Decimal('5.900'),
+    6: Decimal('5.900'),
+    8: Decimal('5.900'),
     12: Decimal('6.900'),
     15: Decimal('5.900'),
     17: Decimal('5.900'),

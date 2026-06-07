@@ -56,7 +56,7 @@ class HomeTests(TestCase):
     def test_selected_cakes_use_five_nine_hundred_starting_price(self):
         response = self.client.get(reverse('home'))
 
-        for cake_id in [15, 17, 18, 19, 26, 27]:
+        for cake_id in [5, 6, 8, 15, 17, 18, 19, 26, 27]:
             cake = Cake.objects.get(id=cake_id)
             self.assertEqual(cake.price_per_kg, Decimal('5.900'))
             self.assertContains(response, f'يبدأ من {cake.price_per_kg_display} ريال')
