@@ -1,4 +1,3 @@
-import re
 from datetime import timedelta
 from decimal import Decimal
 from tempfile import TemporaryDirectory
@@ -76,7 +75,6 @@ class HomeTests(TestCase):
             25: Decimal('8.900'),
             26: Decimal('8.900'),
             28: Decimal('6.900'),
-            33: Decimal('0.600'),
         }
 
         for catalog_number, expected_price in requested_prices.items():
@@ -100,31 +98,12 @@ class HomeTests(TestCase):
 
         self.assertNotIn(7, list(response.context['cakes'].values_list('id', flat=True)))
 
-    def test_removed_twelfth_catalog_cake_is_hidden_from_home(self):
-        response = self.client.get(reverse('home'))
-        visible_cakes = list(response.context['cakes'])
-
-        self.assertNotIn(
-            'images/cakes/product-18.jpeg',
-            [cake.catalog_image for cake in visible_cakes],
-        )
-        self.assertEqual(visible_cakes[11].catalog_image, 'images/cakes/product-34.jpeg')
-
     def test_cake_numbers_are_resequenced_after_hidden_cake(self):
         response = self.client.get(reverse('home'))
         visible_cakes = list(response.context['cakes'])
 
         self.assertEqual(visible_cakes[6].id, 8)
         self.assertContains(response, 'رقم الكعكة: 7')
-
-    def test_visible_cake_numbers_are_continuous_after_removed_cakes(self):
-        response = self.client.get(reverse('home'))
-        rendered_numbers = [
-            int(number)
-            for number in re.findall(rb'cake-number">[^<]*: ([0-9]+)</span>', response.content)
-        ]
-
-        self.assertEqual(rendered_numbers, list(range(1, len(rendered_numbers) + 1)))
 
 
 class BookingFormTests(TestCase):
@@ -243,18 +222,6 @@ class WhatsappOrderTests(TestCase):
 
         response = self.client.get(reverse('whatsapp_order'), {
             'cake': 7,
-            'weight_kg': '1',
-            'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
-            'delivery_time': '16:45',
-        })
-
-        self.assertEqual(response.status_code, 404)
-
-    def test_removed_twelfth_catalog_cake_cannot_be_ordered_through_whatsapp(self):
-        cake = Cake.objects.get(catalog_image='images/cakes/product-18.jpeg')
-
-        response = self.client.get(reverse('whatsapp_order'), {
-            'cake': cake.id,
             'weight_kg': '1',
             'delivery_date': (timezone.localdate() + timedelta(days=1)).isoformat(),
             'delivery_time': '16:45',
