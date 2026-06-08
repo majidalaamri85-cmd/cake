@@ -1,5 +1,4 @@
 import uuid
-from decimal import Decimal
 from urllib.parse import quote
 
 from django.conf import settings
@@ -103,7 +102,6 @@ def whatsapp_order(request):
     delivery_time_display = delivery_time.strftime('%H:%M')
     cake_message = request.GET.get('cake_message', '').strip()[:100] or 'لا توجد كتابة'
 
-    total_price = Decimal(weight_kg) * cake.price_per_kg
     if cake.catalog_image:
         product_url = request.build_absolute_uri(static(cake.catalog_image))
     elif cake.image:
@@ -117,7 +115,6 @@ def whatsapp_order(request):
         f'تاريخ التسليم: {delivery_date:%Y-%m-%d}\n'
         f'وقت التسليم: {delivery_time_display}\n'
         f'الكتابة على الكعكة: {cake_message}\n'
-        f'السعر التقريبي: {total_price} {settings.PAYMENT_CURRENCY}\n'
         f'صورة الكعكة: {product_url}\n'
         'فضلاً أرسلوا لي تفاصيل التأكيد.'
     )

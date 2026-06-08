@@ -196,7 +196,7 @@ class WhatsappOrderTests(TestCase):
 
         message = parse_qs(urlparse(response.url).query)['text'][0]
         self.assertIn('0.5', message)
-        self.assertIn(str(Decimal('0.5') * self.cake.price_per_kg), message)
+        self.assertNotIn('السعر التقريبي', message)
 
     def test_missing_delivery_time_redirects_to_home(self):
         response = self.client.get(reverse('whatsapp_order'), {
