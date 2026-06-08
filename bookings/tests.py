@@ -75,6 +75,7 @@ class HomeTests(TestCase):
             25: Decimal('8.900'),
             26: Decimal('8.900'),
             28: Decimal('6.900'),
+            33: Decimal('0.600'),
         }
 
         for catalog_number, expected_price in requested_prices.items():
