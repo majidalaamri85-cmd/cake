@@ -99,6 +99,15 @@ class HomeTests(TestCase):
 
         self.assertNotIn(7, list(response.context['cakes'].values_list('id', flat=True)))
 
+    def test_twelfth_catalog_cake_is_visible_on_home(self):
+        response = self.client.get(reverse('home'))
+        visible_cakes = list(response.context['cakes'])
+
+        self.assertIn(
+            'images/cakes/product-17.jpeg',
+            [cake.catalog_image for cake in visible_cakes],
+        )
+
     def test_cake_numbers_are_resequenced_after_hidden_cake(self):
         response = self.client.get(reverse('home'))
         visible_cakes = list(response.context['cakes'])
