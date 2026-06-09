@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
@@ -30,12 +32,23 @@ class Cake(models.Model):
         return self.name
 
     @property
-    def price_per_kg(self):
-        catalog_number = None
+    def catalog_number(self):
         if self.id:
-            catalog_number = Cake.objects.filter(is_available=True, id__lte=self.id).count()
+            return Cake.objects.filter(is_available=True, id__lte=self.id).count()
+        return None
+
+    @property
+    def piece_price(self):
+        return settings.CAKE_PIECE_CATALOG_NUMBER_PRICES.get(self.catalog_number)
+
+    @property
+    def is_piece_priced(self):
+        return self.piece_price is not None
+
+    @property
+    def price_per_kg(self):
         return (
-            settings.CAKE_SPECIAL_CATALOG_NUMBER_PRICES_PER_KG.get(catalog_number)
+            settings.CAKE_SPECIAL_CATALOG_NUMBER_PRICES_PER_KG.get(self.catalog_number)
             or settings.CAKE_SPECIAL_PRICES_PER_KG.get(self.id)
             or settings.CAKE_SPECIAL_CATALOG_IMAGE_PRICES_PER_KG.get(self.catalog_image)
             or settings.CAKE_PRICE_PER_KG
@@ -44,6 +57,23 @@ class Cake(models.Model):
     @property
     def price_per_kg_display(self):
         return f'{self.price_per_kg:.3f}'
+
+    @property
+    def unit_price(self):
+        return self.piece_price or self.price_per_kg
+
+    @property
+    def unit_price_display(self):
+        return f'{self.unit_price:.3f}'
+
+    @property
+    def price_badge_text(self):
+        if self.is_piece_priced:
+            if self.piece_price < Decimal('1'):
+                baisa = int(self.piece_price * Decimal('1000'))
+                return f'القطعة ب {baisa} بيسة'
+            return f'القطعة ب {self.unit_price_display} {settings.PAYMENT_CURRENCY}'
+        return f'يبدأ من {self.price_per_kg_display} {settings.PAYMENT_CURRENCY}'
 
 
 class Booking(models.Model):
@@ -80,7 +110,10 @@ class Booking(models.Model):
         ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
-        self.total_price = self.weight_kg * self.quantity * self.cake.price_per_kg
+        if self.cake.is_piece_priced:
+            self.total_price = self.quantity * self.cake.piece_price
+        else:
+            self.total_price = self.weight_kg * self.quantity * self.cake.price_per_kg
         super().save(*args, **kwargs)
 
     def __str__(self):

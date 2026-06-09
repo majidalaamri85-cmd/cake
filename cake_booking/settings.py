@@ -216,10 +216,17 @@ CAKE_SPECIAL_CATALOG_NUMBER_PRICES_PER_KG = {
     12: Decimal('5.900'),
     13: Decimal('6.900'),
     14: Decimal('5.900'),
+    23: Decimal('5.900'),
+    24: Decimal('8.900'),
     25: Decimal('8.900'),
-    26: Decimal('8.900'),
-    28: Decimal('6.900'),
-    33: Decimal('0.600'),
+    26: Decimal('4.900'),
+    27: Decimal('6.900'),
+    28: Decimal('4.900'),
+    33: Decimal('4.900'),
+}
+CAKE_PIECE_CATALOG_NUMBER_PRICES = {
+    31: Decimal('0.600'),
+    32: Decimal('0.600'),
 }
 CAKE_SPECIAL_CATALOG_IMAGE_PRICES_PER_KG = {
     'images/cakes/product-52.jpeg': Decimal('5.900'),

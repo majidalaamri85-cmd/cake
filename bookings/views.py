@@ -148,7 +148,11 @@ def create_booking(request):
         'form': form,
         'price_per_kg': f'{settings.CAKE_PRICE_PER_KG:.3f}',
         'cake_prices': {
-            str(cake.id): str(cake.price_per_kg)
+            str(cake.id): str(cake.unit_price)
+            for cake in Cake.objects.filter(is_available=True)
+        },
+        'cake_price_modes': {
+            str(cake.id): 'piece' if cake.is_piece_priced else 'kg'
             for cake in Cake.objects.filter(is_available=True)
         },
         'currency': settings.PAYMENT_CURRENCY,

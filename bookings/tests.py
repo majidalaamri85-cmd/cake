@@ -75,16 +75,28 @@ class HomeTests(TestCase):
             12: Decimal('5.900'),
             13: Decimal('6.900'),
             14: Decimal('5.900'),
+            23: Decimal('5.900'),
+            24: Decimal('8.900'),
             25: Decimal('8.900'),
-            26: Decimal('8.900'),
-            28: Decimal('6.900'),
-            33: Decimal('0.600'),
+            26: Decimal('4.900'),
+            27: Decimal('6.900'),
+            28: Decimal('4.900'),
+            33: Decimal('4.900'),
         }
 
         for catalog_number, expected_price in requested_prices.items():
             cake = visible_cakes[catalog_number - 1]
             self.assertEqual(cake.price_per_kg, expected_price)
             self.assertContains(response, f'يبدأ من {cake.price_per_kg_display} ريال')
+
+    def test_piece_priced_cakes_show_baisa_per_piece(self):
+        response = self.client.get(reverse('home'))
+        visible_cakes = list(response.context['cakes'])
+
+        for catalog_number in [31, 32]:
+            cake = visible_cakes[catalog_number - 1]
+            self.assertEqual(cake.piece_price, Decimal('0.600'))
+            self.assertContains(response, 'القطعة ب 600 بيسة')
 
     def test_new_catalog_cakes_use_default_starting_price(self):
         response = self.client.get(reverse('home'))

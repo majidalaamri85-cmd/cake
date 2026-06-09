@@ -7,7 +7,7 @@
     <section class="panel">
         <div class="section-head">
             <h1>حجز كعكة جديدة</h1>
-            <span class="badge"><span id="price-per-kg">{{ price_per_kg }}</span> {{ currency }} / كجم</span>
+            <span class="badge"><span id="price-per-kg">{{ price_per_kg }}</span> <span id="price-unit">{{ currency }} / كجم</span></span>
         </div>
 
         <form method="post" class="form-grid" id="booking-form" data-price="{{ price_per_kg }}">
@@ -37,20 +37,25 @@
 
 <script>
     {{ cake_prices|json_script:"cake-prices" }}
+    {{ cake_price_modes|json_script:"cake-price-modes" }}
     const form = document.getElementById('booking-form');
     const cake = document.getElementById('id_cake');
     const weight = document.getElementById('id_weight_kg');
     const quantity = document.getElementById('id_quantity');
     const total = document.getElementById('live-total');
     const pricePerKg = document.getElementById('price-per-kg');
+    const priceUnit = document.getElementById('price-unit');
     const cakePrices = JSON.parse(document.getElementById('cake-prices').textContent);
+    const cakePriceModes = JSON.parse(document.getElementById('cake-price-modes').textContent);
 
     function updateTotal() {
         const kg = Number(weight.value || 0);
         const qty = Number(quantity.value || 1);
         const price = Number(cakePrices[cake.value] || form.dataset.price || 0);
+        const mode = cakePriceModes[cake.value] || 'kg';
         pricePerKg.textContent = price.toFixed(3);
-        total.textContent = `${(kg * qty * price).toFixed(3)} {{ currency }}`;
+        priceUnit.textContent = mode === 'piece' ? 'للقطعة' : '{{ currency }} / كجم';
+        total.textContent = `${((mode === 'piece' ? 1 : kg) * qty * price).toFixed(3)} {{ currency }}`;
     }
 
     cake.addEventListener('change', updateTotal);

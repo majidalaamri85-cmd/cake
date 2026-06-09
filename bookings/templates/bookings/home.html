@@ -47,7 +47,7 @@
                             {{ cake.name|first }}
                         {% endif %}
                         <span class="cake-number">رقم الكعكة: {{ forloop.counter }}</span>
-                        <span class="image-price">يبدأ من {{ cake.price_per_kg_display }} {{ currency }}</span>
+                        <span class="image-price">{{ cake.price_badge_text }}</span>
                     </div>
                     <div class="card-body">
                         <form class="quick-book" method="get" action="{% url 'whatsapp_order' %}">
