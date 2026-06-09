@@ -71,8 +71,10 @@ class HomeTests(TestCase):
         response = self.client.get(reverse('home'))
         visible_cakes = list(response.context['cakes'])
         requested_prices = {
-            12: Decimal('6.900'),
-            14: Decimal('6.900'),
+            11: Decimal('6.900'),
+            12: Decimal('5.900'),
+            13: Decimal('6.900'),
+            14: Decimal('5.900'),
             25: Decimal('8.900'),
             26: Decimal('8.900'),
             28: Decimal('6.900'),
